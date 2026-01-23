@@ -1,0 +1,17 @@
+name: napari-segmentation-sieve
+display_name: Segmentation Sieve
+# use 'hidden' to remove plugin from napari hub search results
+visibility: public
+# see https://napari.org/stable/plugins/technical_references/manifest.html#fields for valid categories
+# categories: []
+contributions:
+  commands:
+    - id: napari-segmentation-sieve.segmentation_sieve_widget
+      python_name: napari_segmentation_sieve:SegmentationSieve
+      title: Segmentation sieve
+  widgets:
+    - command: napari-segmentation-sieve.segmentation_sieve_widget
+      display_name: Segmentation sieve
+  menus:
+    napari/layers/segment:
+      - command: napari-segmentation-sieve.segmentation_sieve_widget
