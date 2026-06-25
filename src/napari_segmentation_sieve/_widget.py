@@ -3,7 +3,6 @@ from warnings import warn
 
 import numpy as np
 from magicgui.widgets import (
-    CheckBox,
     Container,
     PushButton,
     SpinBox,
@@ -219,41 +218,30 @@ class Watershed(Container):
         self._mask_layer_combo = create_widget(
             label="Mask", annotation="napari.layers.Labels | None"
         )
-        self._point_layer_combo = create_widget(
-            label="Coords", annotation="napari.layers.Points"
+        self._seed_layer_combo = create_widget(
+            label="Seed", annotation="napari.layers.Labels"
         )
-        self._cb_distance_transform = CheckBox(label="Distance transform")
         self._btn_watershed = PushButton(text="Watershed")
         self._btn_watershed.clicked.connect(self.watershed)
         self.extend(
             [
                 self._image_layer_combo,
                 self._mask_layer_combo,
-                self._point_layer_combo,
-                self._cb_distance_transform,
+                self._seed_layer_combo,
                 self._btn_watershed,
             ]
         )
 
-    @with_layer_data(["_image_layer_combo", "_point_layer_combo"])
-    def watershed(self, image_data: np.ndarray, point_data: np.ndarray):
+    @with_layer_data(["_image_layer_combo", "_seed_layer_combo"])
+    def watershed(self, image_data: np.ndarray, seed_data: np.ndarray):
         mask = (
             self._mask_layer_combo.value
         )  # pyright: ignore[reportAttributeAccessIssue]
-        if mask is not None and mask.shape != image_data.shape:
+        if mask is not None and mask.data.shape != image_data.shape:
             warn(
-                f"Mask shape {mask.shape} != image shape {image_data.shape}",
+                f"Mask shape {mask.data.shape} != image shape {image_data.shape}",
                 stacklevel=2,
             )
-        if self._cb_distance_transform.value:
-            image_data = ndimage.distance_transform_edt(
-                image_data.astype(np.uint8)
-            )  # pyright: ignore[reportAssignmentType]
-        assert isinstance(image_data, np.ndarray)
-
-        markers = np.zeros_like(image_data, dtype=int)
-        for i, coord in enumerate(point_data.astype(int), start=1):
-            markers[tuple(coord.T)] = i
-
-        labels = watershed(-image_data, markers, mask=mask)
+            return
+        labels = watershed(-image_data, seed_data, mask=mask.data)
         self._viewer.add_labels(labels, name="watershed")
