@@ -1,8 +1,9 @@
-from functools import wraps
 from typing import TYPE_CHECKING
+from warnings import warn
 
 import numpy as np
 from magicgui.widgets import (
+    CheckBox,
     Container,
     PushButton,
     SpinBox,
@@ -17,6 +18,7 @@ from skimage.morphology import (
     isotropic_opening,
     remove_small_objects,
 )
+from skimage.segmentation import watershed
 
 if TYPE_CHECKING:
     import napari
@@ -24,7 +26,6 @@ if TYPE_CHECKING:
 
 def with_layer_data(layer_combos, callback=None):
     def decorator(method):
-        @wraps(method)
         def wrapper(self):
             layers = {}
             data_list = []
@@ -206,3 +207,53 @@ class MorphologyTools(Container):
     def _on_close_clicked(self, data):
         radius = self._spin_radius.value
         return {"_label_layer_combo": isotropic_closing(data, radius=radius)}
+
+
+class Watershed(Container):
+    def __init__(self, viewer: "napari.viewer.Viewer"):
+        super().__init__()
+        self._viewer = viewer
+        self._image_layer_combo = create_widget(
+            label="Image", annotation="napari.layers.Image"
+        )
+        self._mask_layer_combo = create_widget(
+            label="Mask", annotation="napari.layers.Labels | None"
+        )
+        self._point_layer_combo = create_widget(
+            label="Coords", annotation="napari.layers.Points"
+        )
+        self._cb_distance_transform = CheckBox(label="Distance transform")
+        self._btn_watershed = PushButton(text="Watershed")
+        self._btn_watershed.clicked.connect(self.watershed)
+        self.extend(
+            [
+                self._image_layer_combo,
+                self._mask_layer_combo,
+                self._point_layer_combo,
+                self._cb_distance_transform,
+                self._btn_watershed,
+            ]
+        )
+
+    @with_layer_data(["_image_layer_combo", "_point_layer_combo"])
+    def watershed(self, image_data: np.ndarray, point_data: np.ndarray):
+        mask = (
+            self._mask_layer_combo.value
+        )  # pyright: ignore[reportAttributeAccessIssue]
+        if mask is not None and mask.shape != image_data.shape:
+            warn(
+                f"Mask shape {mask.shape} != image shape {image_data.shape}",
+                stacklevel=2,
+            )
+        if self._cb_distance_transform.value:
+            image_data = ndimage.distance_transform_edt(
+                image_data.astype(np.uint8)
+            )  # pyright: ignore[reportAssignmentType]
+        assert isinstance(image_data, np.ndarray)
+
+        markers = np.zeros_like(image_data, dtype=int)
+        for i, coord in enumerate(point_data.astype(int), start=1):
+            markers[tuple(coord.T)] = i
+
+        labels = watershed(-image_data, markers, mask=mask)
+        self._viewer.add_labels(labels, name="watershed")
