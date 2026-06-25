@@ -3,6 +3,16 @@ try:
 except ImportError:
     __version__ = "unknown"
 
-from ._widget import MorphologyTools, SegmentationSieve, watershed_widget
+from ._widget import (
+    MorphologyTools,
+    SegmentationSieve,
+    threshold_widget,
+    watershed_widget,
+)
 
-__all__ = ("SegmentationSieve", "MorphologyTools", "watershed_widget")
+__all__ = (
+    "SegmentationSieve",
+    "MorphologyTools",
+    "watershed_widget",
+    "threshold_widget",
+)

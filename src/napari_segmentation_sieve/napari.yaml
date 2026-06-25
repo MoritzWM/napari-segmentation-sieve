@@ -12,6 +12,9 @@ contributions:
     - id: napari-segmentation-sieve.morphology_tools_widget
       python_name: napari_segmentation_sieve:MorphologyTools
       title: Morphology tools
+    - id: napari-segmentation-sieve.threshold_widget
+      python_name: napari_segmentation_sieve:threshold_widget
+      title: Threshold
     - id: napari-segmentation-sieve.watershed_widget
       python_name: napari_segmentation_sieve:watershed_widget
       title: Watershed
@@ -22,8 +25,11 @@ contributions:
       display_name: Morphology tools
     - command: napari-segmentation-sieve.watershed_widget
       display_name: Watershed
+    - command: napari-segmentation-sieve.threshold_widget
+      display_name: Threshold
   menus:
     napari/layers/segment:
       - command: napari-segmentation-sieve.segmentation_sieve_widget
       - command: napari-segmentation-sieve.morphology_tools_widget
       - command: napari-segmentation-sieve.watershed_widget
+      - command: napari-segmentation-sieve.threshold_widget

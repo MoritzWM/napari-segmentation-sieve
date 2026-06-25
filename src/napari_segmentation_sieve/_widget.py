@@ -10,6 +10,7 @@ from magicgui.widgets import (
     create_widget,
 )
 from scipy import ndimage
+from skimage import img_as_float
 from skimage.morphology import (
     isotropic_closing,
     isotropic_dilation,
@@ -206,6 +207,30 @@ class MorphologyTools(Container):
     def _on_close_clicked(self, data):
         radius = self._spin_radius.value
         return {"_label_layer_combo": isotropic_closing(data, radius=radius)}
+
+
+def _on_threshold_widget_init(widget):
+    @widget.img_layer.changed.connect
+    def _on_layer_changed(image_layer):
+        if image_layer is None:
+            return
+        widget.threshold.min = image_layer.data.min()
+        widget.threshold.max = image_layer.data.max()
+
+    _on_layer_changed(widget.img_layer.value)
+    if widget.img_layer.value is not None:
+        widget()
+
+
+@magic_factory(
+    widget_init=_on_threshold_widget_init,
+    threshold={"widget_type": "FloatSlider"},
+    auto_call=True,
+)
+def threshold_widget(
+    img_layer: "napari.layers.Image", threshold: "float"
+) -> "napari.types.LabelsData":
+    return img_as_float(img_layer.data) > threshold
 
 
 @magic_factory()
