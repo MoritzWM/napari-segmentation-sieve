@@ -80,27 +80,6 @@ class SegmentationSieve(Container):
                 self._btn_small_objects,
             ],
         )
-        # Dilation/erosion
-        self._btn_dilation = PushButton(text="Dilate")
-        self._btn_erosion = PushButton(text="Erode")
-        self._btn_open = PushButton(text="Open")
-        self._btn_close = PushButton(text="Close")
-        self._spin_dilation_erosion_radius = SpinBox(min=1, max=1e9)
-        self._btn_dilation.clicked.connect(self._on_dilation_clicked)
-        self._btn_erosion.clicked.connect(self._on_erosion_clicked)
-        self._btn_open.clicked.connect(self._on_open_clicked)
-        self._btn_close.clicked.connect(self._on_close_clicked)
-        self._container_dilation_erosion = Container(
-            label="Morphology",
-            layout="horizontal",
-            widgets=[
-                self._spin_dilation_erosion_radius,
-                self._btn_dilation,
-                self._btn_erosion,
-                self._btn_open,
-                self._btn_close,
-            ],
-        )
         # Voxel counts
         self._table_voxel_counts = Table()
         self.extend(
@@ -108,7 +87,6 @@ class SegmentationSieve(Container):
                 self._label_layer_combo,
                 self._container_renumber,
                 self._container_small_objects,
-                self._container_dilation_erosion,
                 self._table_voxel_counts,
             ]
         )
@@ -140,22 +118,57 @@ class SegmentationSieve(Container):
         thresh = self._spin_small_object_thresh.value
         return remove_small_objects(data, max_size=thresh)
 
+
+class MorphologyTools(Container):
+    def __init__(self, viewer: "napari.viewer.Viewer"):
+        super().__init__()
+        self._viewer = viewer
+        self._label_layer_combo = create_widget(
+            label="Layer", annotation="napari.layers.Labels"
+        )
+        self._btn_dilation = PushButton(text="Dilate")
+        self._btn_erosion = PushButton(text="Erode")
+        self._btn_open = PushButton(text="Open")
+        self._btn_close = PushButton(text="Close")
+        self._spin_radius = SpinBox(label="Radius", min=1, max=1e9)
+        self._btn_dilation.clicked.connect(self._on_dilation_clicked)
+        self._btn_erosion.clicked.connect(self._on_erosion_clicked)
+        self._btn_open.clicked.connect(self._on_open_clicked)
+        self._btn_close.clicked.connect(self._on_close_clicked)
+        self._container_buttons = Container(
+            layout="horizontal",
+            widgets=[
+                self._btn_dilation,
+                self._btn_erosion,
+                self._btn_open,
+                self._btn_close,
+            ],
+        )
+
+        self.extend(
+            [
+                self._label_layer_combo,
+                self._spin_radius,
+                self._container_buttons,
+            ]
+        )
+
     @with_layer_data
     def _on_dilation_clicked(self, data):
-        radius = self._spin_dilation_erosion_radius.value
+        radius = self._spin_radius.value
         return isotropic_dilation(data, radius=radius)
 
     @with_layer_data
     def _on_erosion_clicked(self, data):
-        radius = self._spin_dilation_erosion_radius.value
+        radius = self._spin_radius.value
         return isotropic_erosion(data, radius=radius)
 
     @with_layer_data
     def _on_open_clicked(self, data):
-        radius = self._spin_dilation_erosion_radius.value
+        radius = self._spin_radius.value
         return isotropic_opening(data, radius=radius)
 
     @with_layer_data
     def _on_close_clicked(self, data):
-        radius = self._spin_dilation_erosion_radius.value
+        radius = self._spin_radius.value
         return isotropic_closing(data, radius=radius)

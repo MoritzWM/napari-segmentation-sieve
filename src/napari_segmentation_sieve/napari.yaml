@@ -9,9 +9,15 @@ contributions:
     - id: napari-segmentation-sieve.segmentation_sieve_widget
       python_name: napari_segmentation_sieve:SegmentationSieve
       title: Segmentation sieve
+    - id: napari-segmentation-sieve.morphology_tools_widget
+      python_name: napari_segmentation_sieve:MorphologyTools
+      title: Morphology tools
   widgets:
     - command: napari-segmentation-sieve.segmentation_sieve_widget
       display_name: Segmentation sieve
+    - command: napari-segmentation-sieve.morphology_tools_widget
+      display_name: Morphology tools
   menus:
     napari/layers/segment:
       - command: napari-segmentation-sieve.segmentation_sieve_widget
+      - command: napari-segmentation-sieve.morphology_tools_widget
