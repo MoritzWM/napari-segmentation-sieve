@@ -212,7 +212,7 @@ class MorphologyTools(Container):
 @magic_factory(
     operation={"choices": ["add", "subtract", "multiply", "divide"]}
 )
-def boolean_algebra(
+def arithmetics(
     layer_1: "napari.layers.Labels",
     layer_2: "napari.layers.Labels",
     operation: str,
