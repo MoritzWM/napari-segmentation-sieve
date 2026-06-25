@@ -22,19 +22,45 @@ if TYPE_CHECKING:
     import napari
 
 
-def with_layer_data(method):
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        layer = self._label_layer_combo.value
-        if layer is None:
-            return
-        data = layer.data
-        if data is None:
-            return
-        layer.data = method(self, data)
-        self._update_table_voxel_counts()
+def with_layer_data(layer_combos, callback=None):
+    def decorator(method):
+        @wraps(method)
+        def wrapper(self):
+            layers = {}
+            data_list = []
 
-    return wrapper
+            for combo_name in layer_combos:
+                layer = getattr(self, combo_name).value
+                if layer is None:
+                    return
+                data = layer.data
+                if data is None:
+                    return
+                layers[combo_name] = layer
+                data_list.append(data)
+
+            # Call method with unpacked data
+            if len(data_list) == 1:
+                result = method(self, data_list[0])
+            else:
+                result = method(self, *data_list)
+
+            # Update layers from result dict
+            if isinstance(result, dict):
+                for combo_name, data in result.items():
+                    if combo_name in layers:
+                        layers[combo_name].data = data
+
+            # Invoke callback if provided
+            if callback:
+                if isinstance(callback, str):
+                    getattr(self, callback)()
+                else:
+                    callback(self)
+
+        return wrapper
+
+    return decorator
 
 
 class SegmentationSieve(Container):
@@ -104,19 +130,27 @@ class SegmentationSieve(Container):
             "Voxels": counts,
         }
 
-    @with_layer_data
+    @with_layer_data(
+        ["_label_layer_combo"], callback="_update_table_voxel_counts"
+    )
     def _on_renumber_clicked(self, data):
         new_data, _ = ndimage.label(data, structure=np.ones((3, 3, 3)))
-        return new_data
+        return {"_label_layer_combo": new_data}
 
-    @with_layer_data
+    @with_layer_data(
+        ["_label_layer_combo"], callback="_update_table_voxel_counts"
+    )
     def _on_renumber_to_one_clicked(self, data):
-        return data > 0
+        return {"_label_layer_combo": data > 0}
 
-    @with_layer_data
+    @with_layer_data(
+        ["_label_layer_combo"], callback="_update_table_voxel_counts"
+    )
     def _on_remove_small_objects_clicked(self, data):
         thresh = self._spin_small_object_thresh.value
-        return remove_small_objects(data, max_size=thresh)
+        return {
+            "_label_layer_combo": remove_small_objects(data, max_size=thresh)
+        }
 
 
 class MorphologyTools(Container):
@@ -153,22 +187,22 @@ class MorphologyTools(Container):
             ]
         )
 
-    @with_layer_data
+    @with_layer_data(["_label_layer_combo"])
     def _on_dilation_clicked(self, data):
         radius = self._spin_radius.value
-        return isotropic_dilation(data, radius=radius)
+        return {"_label_layer_combo": isotropic_dilation(data, radius=radius)}
 
-    @with_layer_data
+    @with_layer_data(["_label_layer_combo"])
     def _on_erosion_clicked(self, data):
         radius = self._spin_radius.value
-        return isotropic_erosion(data, radius=radius)
+        return {"_label_layer_combo": isotropic_erosion(data, radius=radius)}
 
-    @with_layer_data
+    @with_layer_data(["_label_layer_combo"])
     def _on_open_clicked(self, data):
         radius = self._spin_radius.value
-        return isotropic_opening(data, radius=radius)
+        return {"_label_layer_combo": isotropic_opening(data, radius=radius)}
 
-    @with_layer_data
+    @with_layer_data(["_label_layer_combo"])
     def _on_close_clicked(self, data):
         radius = self._spin_radius.value
-        return isotropic_closing(data, radius=radius)
+        return {"_label_layer_combo": isotropic_closing(data, radius=radius)}
