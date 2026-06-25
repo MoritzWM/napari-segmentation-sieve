@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
-from warnings import warn
 
 import numpy as np
+from magicgui import magic_factory
 from magicgui.widgets import (
     Container,
     PushButton,
@@ -208,40 +208,14 @@ class MorphologyTools(Container):
         return {"_label_layer_combo": isotropic_closing(data, radius=radius)}
 
 
-class Watershed(Container):
-    def __init__(self, viewer: "napari.viewer.Viewer"):
-        super().__init__()
-        self._viewer = viewer
-        self._image_layer_combo = create_widget(
-            label="Image", annotation="napari.layers.Image"
-        )
-        self._mask_layer_combo = create_widget(
-            label="Mask", annotation="napari.layers.Labels | None"
-        )
-        self._seed_layer_combo = create_widget(
-            label="Seed", annotation="napari.layers.Labels"
-        )
-        self._btn_watershed = PushButton(text="Watershed")
-        self._btn_watershed.clicked.connect(self.watershed)
-        self.extend(
-            [
-                self._image_layer_combo,
-                self._mask_layer_combo,
-                self._seed_layer_combo,
-                self._btn_watershed,
-            ]
-        )
-
-    @with_layer_data(["_image_layer_combo", "_seed_layer_combo"])
-    def watershed(self, image_data: np.ndarray, seed_data: np.ndarray):
-        mask = (
-            self._mask_layer_combo.value
-        )  # pyright: ignore[reportAttributeAccessIssue]
-        if mask is not None and mask.data.shape != image_data.shape:
-            warn(
-                f"Mask shape {mask.data.shape} != image shape {image_data.shape}",
-                stacklevel=2,
-            )
-            return
-        labels = watershed(-image_data, seed_data, mask=mask.data)
-        self._viewer.add_labels(labels, name="watershed")
+@magic_factory()
+def watershed_widget(
+    image_layer: "napari.layers.Image",
+    mask_layer: "napari.layers.Labels | None",
+    seed_layer: "napari.layers.Labels",
+) -> "napari.types.LabelsData":
+    return watershed(
+        -image_layer.data,
+        seed_layer.data,
+        mask=mask_layer.data if mask_layer else None,
+    )

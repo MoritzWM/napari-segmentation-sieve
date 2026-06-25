@@ -13,7 +13,7 @@ contributions:
       python_name: napari_segmentation_sieve:MorphologyTools
       title: Morphology tools
     - id: napari-segmentation-sieve.watershed_widget
-      python_name: napari_segmentation_sieve:Watershed
+      python_name: napari_segmentation_sieve:watershed_widget
       title: Watershed
   widgets:
     - command: napari-segmentation-sieve.segmentation_sieve_widget
