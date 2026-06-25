@@ -18,6 +18,9 @@ contributions:
     - id: napari-segmentation-sieve.watershed_widget
       python_name: napari_segmentation_sieve:watershed_widget
       title: Watershed
+    - id: napari-segmentation-sieve.boolean_algebra
+      python_name: napari_segmentation_sieve:boolean_algebra
+      title: Boolean algebra
   widgets:
     - command: napari-segmentation-sieve.segmentation_sieve_widget
       display_name: Segmentation sieve
@@ -27,9 +30,12 @@ contributions:
       display_name: Watershed
     - command: napari-segmentation-sieve.threshold_widget
       display_name: Threshold
+    - command: napari-segmentation-sieve.boolean_algebra
+      display_name: Boolean algebra
   menus:
     napari/layers/segment:
       - command: napari-segmentation-sieve.segmentation_sieve_widget
       - command: napari-segmentation-sieve.morphology_tools_widget
       - command: napari-segmentation-sieve.watershed_widget
       - command: napari-segmentation-sieve.threshold_widget
+      - command: napari-segmentation-sieve.boolean_algebra

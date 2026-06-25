@@ -209,6 +209,29 @@ class MorphologyTools(Container):
         return {"_label_layer_combo": isotropic_closing(data, radius=radius)}
 
 
+@magic_factory(
+    operation={"choices": ["add", "subtract", "multiply", "divide"]}
+)
+def boolean_algebra(
+    layer_1: "napari.layers.Labels",
+    layer_2: "napari.layers.Labels",
+    operation: str,
+) -> "napari.types.LabelsData":
+    if layer_1.data.shape != layer_2.data.shape:
+        raise ValueError("Can only combine two layers with the same shape")
+    match operation:
+        case "add":
+            return np.add(layer_1.data, layer_2.data)
+        case "subtract":
+            return np.subtract(layer_1.data, layer_2.data)
+        case "multiply":
+            return np.multiply(layer_1.data, layer_2.data)
+        case "divide":
+            return np.divide(layer_1.data, layer_2.data)
+        case _:
+            raise ValueError(f"Invalid operation: {operation}")
+
+
 def _on_threshold_widget_init(widget):
     @widget.img_layer.changed.connect
     def _on_layer_changed(image_layer):

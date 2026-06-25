@@ -6,6 +6,7 @@ except ImportError:
 from ._widget import (
     MorphologyTools,
     SegmentationSieve,
+    boolean_algebra,
     threshold_widget,
     watershed_widget,
 )
@@ -15,4 +16,5 @@ __all__ = (
     "MorphologyTools",
     "watershed_widget",
     "threshold_widget",
+    "boolean_algebra",
 )
