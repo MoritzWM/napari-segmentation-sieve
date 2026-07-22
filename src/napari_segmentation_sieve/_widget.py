@@ -125,7 +125,7 @@ class SegmentationSieve(Container):
         data = layer.data
         if data is None:
             return
-        values, counts = np.unique_counts(data)
+        values, counts = np.unique(data, return_counts=True)
         self._table_voxel_counts.value = {
             "Label": values,
             "Voxels": counts,
