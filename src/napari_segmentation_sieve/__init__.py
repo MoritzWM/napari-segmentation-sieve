@@ -7,6 +7,7 @@ from ._widget import (
     MorphologyTools,
     SegmentationSieve,
     arithmetics,
+    filters_widget,
     threshold_widget,
     watershed_widget,
 )
@@ -17,4 +18,5 @@ __all__ = (
     "watershed_widget",
     "threshold_widget",
     "arithmetics",
+    "filters_widget",
 )

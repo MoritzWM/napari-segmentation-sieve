@@ -21,6 +21,9 @@ contributions:
     - id: napari-segmentation-sieve.arithmetics
       python_name: napari_segmentation_sieve:arithmetics
       title: Arithmetics
+    - id: napari-segmentation-sieve.filters_widget
+      python_name: napari_segmentation_sieve:filters_widget
+      title: Filters
   widgets:
     - command: napari-segmentation-sieve.segmentation_sieve_widget
       display_name: Segmentation sieve
@@ -32,6 +35,8 @@ contributions:
       display_name: Threshold
     - command: napari-segmentation-sieve.arithmetics
       display_name: Arithmetics
+    - command: napari-segmentation-sieve.filters_widget
+      display_name: Filters
   menus:
     napari/layers/segment:
       - command: napari-segmentation-sieve.segmentation_sieve_widget
@@ -39,3 +44,4 @@ contributions:
       - command: napari-segmentation-sieve.watershed_widget
       - command: napari-segmentation-sieve.threshold_widget
       - command: napari-segmentation-sieve.arithmetics
+      - command: napari-segmentation-sieve.filters_widget

@@ -267,3 +267,19 @@ def watershed_widget(
         seed_layer.data,
         mask=mask_layer.data if mask_layer else None,
     )
+
+
+@magic_factory(
+    filter_name={"choices": ["gaussian"]},
+    sigma={"min": 0, "max": 1e6},
+)
+def filters_widget(
+    layer: "napari.layers.Image",
+    filter_name: str,
+    sigma: float,
+) -> "napari.types.ImageData":
+    from skimage import filters
+
+    match filter_name:
+        case "gaussian":
+            return filters.gaussian(layer.data, sigma=sigma)
