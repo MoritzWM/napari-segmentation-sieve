@@ -4,17 +4,17 @@ except ImportError:
     __version__ = "unknown"
 
 from ._widget import (
-    MorphologyTools,
     SegmentationSieve,
     arithmetics,
     filters_widget,
+    morphology_widget,
     threshold_widget,
     watershed_widget,
 )
 
 __all__ = (
     "SegmentationSieve",
-    "MorphologyTools",
+    "morphology_widget",
     "watershed_widget",
     "threshold_widget",
     "arithmetics",

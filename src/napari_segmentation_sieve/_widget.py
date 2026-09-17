@@ -154,59 +154,26 @@ class SegmentationSieve(Container):
         }
 
 
-class MorphologyTools(Container):
-    def __init__(self, viewer: "napari.viewer.Viewer"):
-        super().__init__()
-        self._viewer = viewer
-        self._label_layer_combo = create_widget(
-            label="Layer", annotation="napari.layers.Labels"
-        )
-        self._btn_dilation = PushButton(text="Dilate")
-        self._btn_erosion = PushButton(text="Erode")
-        self._btn_open = PushButton(text="Open")
-        self._btn_close = PushButton(text="Close")
-        self._spin_radius = SpinBox(label="Radius", min=1, max=1e9)
-        self._btn_dilation.clicked.connect(self._on_dilation_clicked)
-        self._btn_erosion.clicked.connect(self._on_erosion_clicked)
-        self._btn_open.clicked.connect(self._on_open_clicked)
-        self._btn_close.clicked.connect(self._on_close_clicked)
-        self._container_buttons = Container(
-            layout="horizontal",
-            widgets=[
-                self._btn_dilation,
-                self._btn_erosion,
-                self._btn_open,
-                self._btn_close,
-            ],
-        )
-
-        self.extend(
-            [
-                self._label_layer_combo,
-                self._spin_radius,
-                self._container_buttons,
-            ]
-        )
-
-    @with_layer_data(["_label_layer_combo"])
-    def _on_dilation_clicked(self, data):
-        radius = self._spin_radius.value
-        return {"_label_layer_combo": isotropic_dilation(data, radius=radius)}
-
-    @with_layer_data(["_label_layer_combo"])
-    def _on_erosion_clicked(self, data):
-        radius = self._spin_radius.value
-        return {"_label_layer_combo": isotropic_erosion(data, radius=radius)}
-
-    @with_layer_data(["_label_layer_combo"])
-    def _on_open_clicked(self, data):
-        radius = self._spin_radius.value
-        return {"_label_layer_combo": isotropic_opening(data, radius=radius)}
-
-    @with_layer_data(["_label_layer_combo"])
-    def _on_close_clicked(self, data):
-        radius = self._spin_radius.value
-        return {"_label_layer_combo": isotropic_closing(data, radius=radius)}
+@magic_factory(
+    operation={"choices": ["dilate", "erode", "open", "close"]},
+    radius={"min": 1, "max": 1e9},
+)
+def morphology_widget(
+    layer: "napari.layers.Labels",
+    operation: str,
+    radius: int = 1,
+) -> "napari.types.LabelsData":
+    match operation:
+        case "dilate":
+            return isotropic_dilation(layer.data, radius=radius)
+        case "erode":
+            return isotropic_erosion(layer.data, radius=radius)
+        case "open":
+            return isotropic_opening(layer.data, radius=radius)
+        case "close":
+            return isotropic_closing(layer.data, radius=radius)
+        case _:
+            raise ValueError(f"Invalid operation: {operation}")
 
 
 @magic_factory(

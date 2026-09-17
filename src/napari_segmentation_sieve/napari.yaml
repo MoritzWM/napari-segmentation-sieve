@@ -9,8 +9,8 @@ contributions:
     - id: napari-segmentation-sieve.segmentation_sieve_widget
       python_name: napari_segmentation_sieve:SegmentationSieve
       title: Segmentation sieve
-    - id: napari-segmentation-sieve.morphology_tools_widget
-      python_name: napari_segmentation_sieve:MorphologyTools
+    - id: napari-segmentation-sieve.morphology_widget
+      python_name: napari_segmentation_sieve:morphology_widget
       title: Morphology tools
     - id: napari-segmentation-sieve.threshold_widget
       python_name: napari_segmentation_sieve:threshold_widget
@@ -27,7 +27,7 @@ contributions:
   widgets:
     - command: napari-segmentation-sieve.segmentation_sieve_widget
       display_name: Segmentation sieve
-    - command: napari-segmentation-sieve.morphology_tools_widget
+    - command: napari-segmentation-sieve.morphology_widget
       display_name: Morphology tools
     - command: napari-segmentation-sieve.watershed_widget
       display_name: Watershed
@@ -40,7 +40,7 @@ contributions:
   menus:
     napari/layers/segment:
       - command: napari-segmentation-sieve.segmentation_sieve_widget
-      - command: napari-segmentation-sieve.morphology_tools_widget
+      - command: napari-segmentation-sieve.morphology_widget
       - command: napari-segmentation-sieve.watershed_widget
       - command: napari-segmentation-sieve.threshold_widget
       - command: napari-segmentation-sieve.arithmetics
