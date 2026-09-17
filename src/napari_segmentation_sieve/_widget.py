@@ -10,6 +10,7 @@ from magicgui.widgets import (
     create_widget,
 )
 from scipy import ndimage
+from scipy.ndimage import binary_erosion
 from skimage import img_as_float
 from skimage.morphology import (
     isotropic_closing,
@@ -155,7 +156,7 @@ class SegmentationSieve(Container):
 
 
 @magic_factory(
-    operation={"choices": ["dilate", "erode", "open", "close"]},
+    operation={"choices": ["dilate", "erode", "open", "close", "outer_hull"]},
     radius={"min": 1, "max": 1e9},
 )
 def morphology_widget(
@@ -172,6 +173,14 @@ def morphology_widget(
             return isotropic_opening(layer.data, radius=radius)
         case "close":
             return isotropic_closing(layer.data, radius=radius)
+        case "outer_hull":
+            # Create a copy with only the outer surface voxels
+            surface_voxels = layer.data > 0
+            interior = binary_erosion(
+                surface_voxels, structure=np.ones((3, 3, 3))
+            )
+            surface_voxels[interior] = 0
+            return surface_voxels
         case _:
             raise ValueError(f"Invalid operation: {operation}")
 
