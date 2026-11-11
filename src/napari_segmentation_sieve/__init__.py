@@ -7,7 +7,9 @@ from ._widget import (
     SegmentationSieve,
     arithmetics,
     filters_widget,
+    merge_labels_widget,
     morphology_widget,
+    split_labels_widget,
     threshold_widget,
     watershed_widget,
 )
@@ -19,4 +21,6 @@ __all__ = (
     "threshold_widget",
     "arithmetics",
     "filters_widget",
+    "split_labels_widget",
+    "merge_labels_widget",
 )

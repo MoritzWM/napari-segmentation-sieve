@@ -259,3 +259,123 @@ def filters_widget(
     match filter_name:
         case "gaussian":
             return filters.gaussian(layer.data, sigma=sigma)
+
+
+def _count_objects(layer):
+    if layer is None:
+        return 0
+    values = np.unique(layer.data)
+    return int(np.count_nonzero(values))
+
+
+def _on_split_labels_widget_init(widget):
+    def _update_call_button(layer=None):
+        n = _count_objects(widget.layer.value)
+        noun = "layer" if n == 1 else "layers"
+        widget.call_button.text = f"Split into {n} {noun}"
+
+    widget.layer.changed.connect(_update_call_button)
+    _update_call_button()
+
+
+@magic_factory(
+    widget_init=_on_split_labels_widget_init,
+    layer={"label": "Labels layer"},
+    name_prefix={
+        "label": "Name prefix",
+        "tooltip": "Defaults to the layer name",
+    },
+)
+def split_labels_widget(
+    layer: "napari.layers.Labels",
+    name_prefix: str = "",
+) -> "list[napari.types.LayerDataTuple]":
+    """Split a labels layer into one labels layer per object.
+
+    Each new layer has the same shape as the original and contains a single
+    object, labelled 1.
+    """
+    values = np.unique(layer.data)
+    colors = {int(v): layer.get_color(v) for v in values if v != 0}
+    return split_labels(
+        layer.data, name_prefix or layer.name, layer.scale, colors
+    )
+
+
+def split_labels(data, name_prefix, scale=None, colors=None):
+    """Return napari LayerDataTuples, one full-size layer per label value.
+
+    ``colors`` maps original label values to RGBA. Each new layer's object
+    (label 1) is given the colour its original label had.
+    """
+    from napari.utils.colormaps import DirectLabelColormap
+
+    data = np.asarray(data)
+    layers = []
+    for value in np.unique(data):
+        if value == 0:
+            continue
+        obj = np.zeros(data.shape, dtype=data.dtype)
+        obj[data == value] = 1
+        kwargs = {"name": f"{name_prefix}_{value}"}
+        if scale is not None:
+            kwargs["scale"] = scale
+        color = (colors or {}).get(int(value))
+        if color is not None:
+            kwargs["colormap"] = DirectLabelColormap(
+                color_dict={1: color, None: (0, 0, 0, 0)}
+            )
+        layers.append((obj, kwargs, "labels"))
+    return layers
+
+
+@magic_factory(call_button="Merge selected layers")
+def merge_labels_widget(
+    viewer: "napari.viewer.Viewer",
+) -> "napari.types.LayerDataTuple":
+    """Merge all selected labels layers into one new labels layer.
+
+    All selected layers must have the same shape. Labels are always
+    renumbered: each layer's labels get the next free label numbers, in
+    their original order. Where layers overlap, the later layer in the
+    selection wins.
+    """
+    from napari.layers import Labels
+
+    layers = [
+        layer for layer in viewer.layers.selection if isinstance(layer, Labels)
+    ]
+    if not layers:
+        raise ValueError("Select one or more labels layers to merge")
+    data = merge_labels([layer.data for layer in layers])
+    return (
+        data,
+        {"name": "merged labels", "scale": layers[0].scale},
+        "labels",
+    )
+
+
+def merge_labels(arrays):
+    """Combine same-shaped label arrays, renumbering all labels.
+
+    Each array's labels are mapped to consecutive numbers after the labels
+    already used by earlier arrays.
+    """
+    if not arrays:
+        raise ValueError("No labels layers given")
+    shape = arrays[0].shape
+    if any(a.shape != shape for a in arrays):
+        raise ValueError("All selected labels layers must have the same shape")
+    max_label = sum(int(np.unique(a[a > 0]).size) for a in arrays)
+    dtype = np.result_type(np.min_scalar_type(max_label), *arrays)
+    out = np.zeros(shape, dtype=dtype)
+    next_free = 0
+    for data in arrays:
+        values = np.unique(data[data > 0])
+        if values.size == 0:
+            continue
+        mask = data > 0
+        ranks = np.searchsorted(values, data[mask])
+        out[mask] = next_free + 1 + ranks
+        next_free += values.size
+    return out

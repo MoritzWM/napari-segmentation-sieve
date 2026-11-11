@@ -24,6 +24,12 @@ contributions:
     - id: napari-segmentation-sieve.filters_widget
       python_name: napari_segmentation_sieve:filters_widget
       title: Filters
+    - id: napari-segmentation-sieve.split_labels_widget
+      python_name: napari_segmentation_sieve:split_labels_widget
+      title: Split labels
+    - id: napari-segmentation-sieve.merge_labels_widget
+      python_name: napari_segmentation_sieve:merge_labels_widget
+      title: Merge labels
   widgets:
     - command: napari-segmentation-sieve.segmentation_sieve_widget
       display_name: Segmentation sieve
@@ -37,6 +43,10 @@ contributions:
       display_name: Arithmetics
     - command: napari-segmentation-sieve.filters_widget
       display_name: Filters
+    - command: napari-segmentation-sieve.split_labels_widget
+      display_name: Split labels
+    - command: napari-segmentation-sieve.merge_labels_widget
+      display_name: Merge labels
   menus:
     napari/layers/segment:
       - command: napari-segmentation-sieve.segmentation_sieve_widget
@@ -45,3 +55,5 @@ contributions:
       - command: napari-segmentation-sieve.threshold_widget
       - command: napari-segmentation-sieve.arithmetics
       - command: napari-segmentation-sieve.filters_widget
+      - command: napari-segmentation-sieve.split_labels_widget
+      - command: napari-segmentation-sieve.merge_labels_widget
